@@ -6,10 +6,10 @@ global counter_r1
 global counter_r2
 global counter_r3
 global counter_r4
-counter_r1 = 0
-counter_r2 = 0
-counter_r3 = 0
-counter_r4 = 0
+counter_r1 = -1
+counter_r2 = -1
+counter_r3 = -1
+counter_r4 = -1
 
 def f1(n):
     i = 1
@@ -126,10 +126,10 @@ def main():
         global_dict['r2'][n] = {'r': r2(n), 'counter' : counter_r2}                   
         global_dict['r3'][n] = {'r': r3(n), 'counter' : counter_r3}                   
         global_dict['r4'][n] = {'r': r4(n), 'counter' : counter_r4}     
-        counter_r1 = 0             
-        counter_r2 = 0             
-        counter_r3 = 0             
-        counter_r4 = 0             
+        counter_r1 = -1             
+        counter_r2 = -1             
+        counter_r3 = -1             
+        counter_r4 = -1             
 
     pprint.pprint(global_dict)
 
