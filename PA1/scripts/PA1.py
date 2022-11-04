@@ -53,11 +53,11 @@ def generateEdgeWeight(G):
     seed = 88939
     for (u,v,w) in G.edges(data=True):
         random.seed(seed)
-        w['weight'] = random.randint(0,10)
+        w['weight'] = random.randint(1,10)
         seed += 1
 
 def main():
-    n = 400
+    n = 10
     p = 0.25
     G = ER(n, p)
     generateEdgeWeight(G)
