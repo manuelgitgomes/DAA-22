@@ -8,6 +8,22 @@ import networkx as nx
 from itertools import chain, combinations, groupby
 import random
 
+# create logger
+logger = logging.getLogger("PA1")
+logger.setLevel(logging.DEBUG)
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+# create formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# add formatter to ch
+ch.setFormatter(formatter)
+
+# add ch to logger
+logger.addHandler(ch)
 
 def generateRandomXY(seed):
     # Generate random X and Y
@@ -86,8 +102,10 @@ def verifyCondition(combination, G):
     all_edges = G.edges(nodes)
     # If these edges are every edge present in the graph, return True. If not, return False.
     if len(all_edges) == len(G.edges):
+        logger.debug(f'Edges {combination} are an edge dominating set')
         return True
     else:
+        logger.debug(f'Edges {combination} are not an edge dominating set')
         return False
 
 def exhaustiveSearch(G):
@@ -114,28 +132,15 @@ def exhaustiveSearch(G):
             for edge in combination:
                 weight += G.edges[edge]['weight']
             if weight < min_weight:
+                logger.debug(f'Weight of current combination ({weight}) is smaller than current minimum weight ({min_weight}). Placing current combination as best.')
+                logger.info(f'New best weight found: ({weight}).')
                 min_weight = weight
                 min_edges = combination
-    return min_edges
+            else:
+                logger.debug(f'Weight of current combination ({weight}) is equal or larger than current minimum weight ({min_weight}).')
+    return min_edges, min_weight
 
 def main():
-    # create logger
-    logger = logging.getLogger("PA1")
-    logger.setLevel(logging.DEBUG)
-
-    # create console handler and set level to debug
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-
-    # create formatter
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-    # add formatter to ch
-    ch.setFormatter(formatter)
-
-    # add ch to logger
-    logger.addHandler(ch)
-
     # Define argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("-n", "--nodes", help='Number of nodes to use.', type=int, default=5)
@@ -149,16 +154,21 @@ def main():
     p = args['probability']
 
     # Generate graph
+    logger.debug('Generating graph')
     G = gnp_random_connected_graph(n,p)
     generateEdgeWeight(G)
     pos = generatePos(n)
+    logger.debug('Graph generated')
+    logger.info(f'Graph generated is: {G}')
     
     # Prepare exhaustive search
-    min_edges = exhaustiveSearch(G)
-    logger.info(f'After exhaustive search, the best solution for the problem is {min_edges}')
+    logger.debug('Exhaustive search starting')
+    min_edges, min_weight = exhaustiveSearch(G)
+    logger.info(f'After exhaustive search, the best solution for the problem is {min_edges} with weight {min_weight}.')
 
     # Prepare plot
     nx.draw_networkx(G, pos)
+    nx.draw_networkx_edges(G, pos, edgelist=min_edges, edge_color=[1,0,0])
     edge_labels = nx.get_edge_attributes(G, "weight")
     nx.draw_networkx_edge_labels(G, pos, edge_labels) 
     plt.title("Practical Assignment 1")
