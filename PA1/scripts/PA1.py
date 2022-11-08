@@ -138,13 +138,43 @@ def exhaustiveSearch(G):
                 min_edges = combination
             else:
                 logger.debug(f'Weight of current combination ({weight}) is equal or larger than current minimum weight ({min_weight}).')
+    
     return min_edges, min_weight
+
+def greedyHeuristics(G):
+    min_weight = 0 
+    weight_list = []
+    min_edges = []
+    
+    # Get edges weight
+    for edge in G.edges():
+        weight_list.append(G.edges[edge]['weight'])
+    
+    # Order edges by weight
+    edges_list = zip(weight_list, G.edges())
+    sorted_edges_list = sorted(edges_list)
+
+    for weight, edge in sorted_edges_list:
+        min_edges.append(edge)
+        min_weight += weight
+        
+        condition = verifyCondition(min_edges, G)
+        
+        if condition:
+            break
+    
+    return min_edges, min_weight
+
+
+
 
 def main():
     # Define argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("-n", "--nodes", help='Number of nodes to use.', type=int, default=5)
     ap.add_argument("-p", "--probability", help='Probabilty of connecting two nodes.', type=float, default=0.5)
+    ap.add_argument("-pl", "--plot", help='Plot graph', action='store_true')
+    ap.add_argument("-s", "--save", help='Save plots', action='store_true')
     
     # Defining args
     args = vars(ap.parse_args())
@@ -166,13 +196,36 @@ def main():
     min_edges, min_weight = exhaustiveSearch(G)
     logger.info(f'After exhaustive search, the best solution for the problem is {min_edges} with weight {min_weight}.')
 
-    # Prepare plot
-    nx.draw_networkx(G, pos)
-    nx.draw_networkx_edges(G, pos, edgelist=min_edges, edge_color=[1,0,0])
-    edge_labels = nx.get_edge_attributes(G, "weight")
-    nx.draw_networkx_edge_labels(G, pos, edge_labels) 
-    plt.title("Practical Assignment 1")
-    plt.show()
+    # Greedy heuristics
+    logger.debug('Greedy heuristics starting')
+    greedy_edges, greedy_weight = greedyHeuristics(G)
+    logger.info(f'After greedy heuristics, the best solution for the problem is {tuple(greedy_edges)} with weight {greedy_weight}.')
+
+    # Prepare plots
+    if args['plot'] or args['save']:
+        edge_labels = nx.get_edge_attributes(G, "weight")
+
+        f1 = plt.figure(1)
+        plt.title("Practical Assignment 1 - Exhaustive Search")
+        nx.draw_networkx(G, pos)
+        nx.draw_networkx_edges(G, pos, edgelist=min_edges, edge_color=[1,0,0])
+        nx.draw_networkx_edge_labels(G, pos, edge_labels) 
+
+        f2 = plt.figure(2)
+        plt.title("Practical Assignment 1 - Greedy Heuristics")
+        nx.draw_networkx(G, pos)
+        nx.draw_networkx_edges(G, pos, edgelist=greedy_edges, edge_color=[1,0,0])
+        nx.draw_networkx_edge_labels(G, pos, edge_labels)
+
+        if args['save']:
+            f1.savefig(f'../report/figs/fig-{n}-{p}-exhaustive.png')
+            f2.savefig(f'../report/figs/fig-{n}-{p}-greedy.png')
+            logger.info('Figures saved')
+        elif args['plot']:
+            f1.show()
+            f2.show()
+            input()
+
 
 if __name__ == '__main__':
     main()
