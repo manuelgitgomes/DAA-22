@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from itertools import chain, combinations, groupby
 import random
+from math import dist
 
 # create logger
 logger = logging.getLogger("PA1")
@@ -14,7 +15,7 @@ logger.setLevel(logging.DEBUG)
 
 # create console handler and set level to debug
 ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
+ch.setLevel(logging.DEBUG)
 
 # create formatter
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -25,46 +26,37 @@ ch.setFormatter(formatter)
 # add ch to logger
 logger.addHandler(ch)
 
-def generateRandomXY(seed):
+def generateRandomXY():
     # Generate random X and Y
-    random.seed(seed)
     x = round(20 * random.random())
-    seed += 1
-    random.seed(seed)
     y = round(20 * random.random())
-    seed += 1
     
-    return x, y, seed
+    return x, y
 
 def generatePos(n):
     # Generate valid position
-    seed = 88939
     pos = {}
     node = 1
     x = None
     y = None
     while node in range(1, n + 1):
-        x, y, seed = generateRandomXY(seed)
+        x, y = generateRandomXY()
         if (x,y) not in pos.values():
             pos[node] = (x,y)
             node += 1
 
     return pos
 
-def generateEdgeWeight(G):
-    # Generate random weight graph
-    seed = 88939
+def generateEdgeWeight(G, pos):
+    # Generate weight graph
     for (u,v,w) in G.edges(data=True):
-        random.seed(seed)
-        w['weight'] = random.randint(1,10)
-        seed += 1
+        w['weight'] = round(dist(pos[u],pos[v]))
 
 def gnp_random_connected_graph(n, p):
     """
     Generates a random undirected graph, similarly to an Erdős-Rényi 
     graph, but enforcing that the resulting graph is conneted
     """
-    seed = 88939
     edges = combinations(range(1,n+1), 2)
     G = nx.Graph()
     G.add_nodes_from(range(1,n+1))
@@ -73,14 +65,10 @@ def gnp_random_connected_graph(n, p):
     if p >= 1:
         return nx.complete_graph(n, create_using=G)
     for _, node_edges in groupby(edges, key=lambda x: x[0]):
-        random.seed(seed)
-        seed += 1
         node_edges = list(node_edges)
         random_edge = random.choice(node_edges)
         G.add_edge(*random_edge)
         for e in node_edges:
-            random.seed(seed)
-            seed += 1
             if random.random() < p:
                 G.add_edge(*e)
     return G
@@ -117,6 +105,7 @@ def exhaustiveSearch(G):
     Returns:
         min_edges (tuple): edges who verify the condition
     """
+    counter = 0
     min_weight = np.inf
     min_edges = None
     # Create a list of every combination of edges in the graph G
@@ -126,6 +115,7 @@ def exhaustiveSearch(G):
 
     # Verify if every combination passes the condition, if so, compare their weight with the current minimum
     for combination in list_combinations:
+        counter += 1
         condition = verifyCondition(combination, G)
         if condition:
             weight = 0
@@ -139,9 +129,10 @@ def exhaustiveSearch(G):
             else:
                 logger.debug(f'Weight of current combination ({weight}) is equal or larger than current minimum weight ({min_weight}).')
     
-    return min_edges, min_weight
+    return min_edges, min_weight, counter
 
 def greedyHeuristics(G):
+    counter = 0
     min_weight = 0 
     weight_list = []
     min_edges = []
@@ -155,6 +146,7 @@ def greedyHeuristics(G):
     sorted_edges_list = sorted(edges_list)
 
     for weight, edge in sorted_edges_list:
+        counter += 1
         min_edges.append(edge)
         min_weight += weight
         
@@ -163,7 +155,7 @@ def greedyHeuristics(G):
         if condition:
             break
     
-    return min_edges, min_weight
+    return min_edges, min_weight, counter
 
 
 
@@ -175,6 +167,7 @@ def main():
     ap.add_argument("-p", "--probability", help='Probabilty of connecting two nodes.', type=float, default=0.5)
     ap.add_argument("-pl", "--plot", help='Plot graph', action='store_true')
     ap.add_argument("-s", "--save", help='Save plots', action='store_true')
+    ap.add_argument("-seed", "--seed", help='Seed to use.', type=int, default=88939)
     
     # Defining args
     args = vars(ap.parse_args())
@@ -182,39 +175,43 @@ def main():
 
     n = args['nodes']
     p = args['probability']
+    random.seed(args['seed'])
 
     # Generate graph
     logger.debug('Generating graph')
     G = gnp_random_connected_graph(n,p)
-    generateEdgeWeight(G)
-    pos = generatePos(n)
     logger.debug('Graph generated')
+    pos = generatePos(n)
+    logger.debug('Positions generated')
+    generateEdgeWeight(G, pos)
+    logger.debug('Weights generated')
     logger.info(f'Graph generated is: {G}')
     
     # Prepare exhaustive search
     logger.debug('Exhaustive search starting')
-    min_edges, min_weight = exhaustiveSearch(G)
-    logger.info(f'After exhaustive search, the best solution for the problem is {min_edges} with weight {min_weight}.')
+    min_edges, min_weight, counter = exhaustiveSearch(G)
+    logger.info(f'After exhaustive search with {counter} simple operations, the best solution for the problem is {min_edges} with weight {min_weight}.')
 
     # Greedy heuristics
     logger.debug('Greedy heuristics starting')
-    greedy_edges, greedy_weight = greedyHeuristics(G)
-    logger.info(f'After greedy heuristics, the best solution for the problem is {tuple(greedy_edges)} with weight {greedy_weight}.')
+    greedy_edges, greedy_weight, greedy_counter = greedyHeuristics(G)
+    logger.info(f'After greedy heuristics with {greedy_counter} simple operations, the best solution for the problem is {tuple(greedy_edges)} with weight {greedy_weight}.')
 
     # Prepare plots
     if args['plot'] or args['save']:
         edge_labels = nx.get_edge_attributes(G, "weight")
+        px = 1/plt.rcParams['figure.dpi']
 
-        f1 = plt.figure(1)
+        f1 = plt.figure(1, figsize=(2560*px, 1440*px))
         plt.title("Practical Assignment 1 - Exhaustive Search")
         nx.draw_networkx(G, pos)
-        nx.draw_networkx_edges(G, pos, edgelist=min_edges, edge_color=[1,0,0])
+        nx.draw_networkx_edges(G, pos, edgelist=list(min_edges), edge_color='r')
         nx.draw_networkx_edge_labels(G, pos, edge_labels) 
 
-        f2 = plt.figure(2)
+        f2 = plt.figure(2, figsize=(2560*px, 1440*px))
         plt.title("Practical Assignment 1 - Greedy Heuristics")
         nx.draw_networkx(G, pos)
-        nx.draw_networkx_edges(G, pos, edgelist=greedy_edges, edge_color=[1,0,0])
+        nx.draw_networkx_edges(G, pos, edgelist=list(greedy_edges), edge_color='r')
         nx.draw_networkx_edge_labels(G, pos, edge_labels)
 
         if args['save']:
