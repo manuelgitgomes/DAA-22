@@ -15,7 +15,7 @@ logger.setLevel(logging.DEBUG)
 
 # create console handler and set level to debug
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.INFO)
 
 # create formatter
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -133,7 +133,7 @@ def exhaustiveSearch(G):
 
 
 def greedyHeuristicsMinWeight(G):
-    counter = 0
+    solutions_counter = 0
     min_weight = 0 
     weight_list = []
     min_edges = []
@@ -143,11 +143,12 @@ def greedyHeuristicsMinWeight(G):
         weight_list.append(G.edges[edge]['weight'])
     
     # Order edges by weight
-    edges_list = zip(weight_list, G.edges())
-    sorted_edges_list = sorted(edges_list)
+    edges_list = list(zip(weight_list, G.edges()))
+    edges_list.sort()
+    logger.debug(f'edges list: {edges_list}')
 
-    for weight, edge in sorted_edges_list:
-        counter += 1
+    for weight, edge in edges_list:
+        solutions_counter += 1
         min_edges.append(edge)
         min_weight += weight
         
@@ -156,15 +157,15 @@ def greedyHeuristicsMinWeight(G):
         if condition:
             break
     
-    return min_edges, min_weight, counter
+    return min_edges, min_weight, solutions_counter
 
 
 def greedyHeuristicsMaxConnection(G):
+    connection_list = []
     counter = 0
     min_weight  = 0 
     nodes_edges_list = []
-    edges_list = []
-    connection_list = []
+    connection_number_list = []
     min_edges = []
     weight_list = []
     
@@ -182,27 +183,86 @@ def greedyHeuristicsMaxConnection(G):
         node_connecting_list.extend(nodes_edges_list[edge[0]-1])
         node_connecting_list.extend(nodes_edges_list[edge[1]-1])
         node_connecting_list = [*set(tuple(sorted(t)) for t in node_connecting_list)]
-        connection_list.append(len(node_connecting_list))
-
-    def sortWeight(tuple):
-        return tuple[2]
+        connection_list.append(node_connecting_list)
+        connection_number_list.append(len(node_connecting_list))
     
     # Order edges by connection
-    edges_list = list(zip(connection_list, G.edges(), weight_list))
+    edges_list = list(zip(connection_number_list, G.edges(), weight_list, connection_list))
     edges_list.sort(key=lambda x: (-x[0], x[2], x[1][0], x[1][1]))
+    logger.debug(f'edges list: {edges_list}')
 
-    for connection, edge, weight in edges_list:
-        counter += 1
-        min_edges.append(edge)
-        min_weight += weight
-        
-        condition = verifyCondition(min_edges, G)
-        
-        if condition:
-            break
+    remove_list = []
+
+    for _ , edge, weight, connections in edges_list:
+        if edge not in remove_list:
+            counter += 1
+            min_edges.append(edge)
+            min_weight += weight
+            
+            condition = verifyCondition(min_edges, G)
+            
+            # remove already neighbouring edges
+            remove_list.extend(connections)
+            logger.debug(f'Removed the following edges: {connections}')
+
+            if condition:
+                break
     
     return min_edges, min_weight, counter
 
+
+def greedyHeuristicsChaurasia(G):
+    counter = 0
+    min_weight  = 0 
+    nodes_edges_list = []
+    connection_list = []
+    min_edges = []
+    weight_list = []
+    weight_ratio_list = []
+    
+    # Get number of edges per node
+    for node in G.nodes():
+        nodes_edges_list.append(list(G.edges(node)))
+    
+    # Get edges weight
+    for edge in G.edges():
+        weight_list.append(G.edges[edge]['weight'])
+
+    edges_list = list(zip(G.edges(), weight_list))
+    # Get number of connecting edges to a certain edge
+    for edge, weight in edges_list:
+        node_connecting_list = []
+        node_connecting_list.extend(nodes_edges_list[edge[0]-1])
+        node_connecting_list.extend(nodes_edges_list[edge[1]-1])
+        node_connecting_list = [*set(tuple(sorted(t)) for t in node_connecting_list)] 
+        neighbour_weight = [weight1 for edge1, weight1 in edges_list if edge1 in node_connecting_list]
+        weight_ratio_list.append(sum(neighbour_weight)/weight)
+        connection_list.append(node_connecting_list)
+
+
+    # Create list with every information needed
+    edges_list = list(zip(connection_list, G.edges(), weight_list, weight_ratio_list))
+    edges_list.sort(key=lambda x: (-x[3], x[2], x[1][0], x[1][1]))
+    logger.debug(f'edges list: {edges_list}')
+
+
+    remove_list = []
+    for connections, edge, weight, weight_ratio in edges_list:
+        if edge not in remove_list:
+            counter += 1
+            min_edges.append(edge)
+            min_weight += weight
+
+            # remove already neighbouring edges
+            remove_list.extend(connections)
+            logger.debug(f'Removed the following edges: {connections}')
+
+            condition = verifyCondition(min_edges, G)
+            
+            if condition:
+                break
+    
+    return min_edges, min_weight, counter
 
 
 def main():
@@ -238,11 +298,16 @@ def main():
     logger.info(f'After exhaustive search with {counter} simple operations, the best solution for the problem is {min_edges} with weight {min_weight}.')
 
     # Greedy heuristics
-    logger.debug('Greedy heuristics starting')
+    logger.debug('Minimum weight greedy heuristics starting')
     min_weight_greedy_edges, min_weight_greedy_weight, min_weight_greedy_counter = greedyHeuristicsMinWeight(G)
     logger.info(f'After minimum weight greedy heuristics with {min_weight_greedy_counter} simple operations, the best solution for the problem is {min_weight_greedy_edges} with weight {min_weight_greedy_weight}.')
+    logger.debug('Maximum connection greedy heuristics starting')
     max_connection_greedy_edges, max_connection_greedy_weight, max_connection_greedy_counter = greedyHeuristicsMaxConnection(G)
     logger.info(f'After maximum connection greedy heuristics with {max_connection_greedy_counter} simple operations, the best solution for the problem is {max_connection_greedy_edges} with weight {max_connection_greedy_weight}.')
+    logger.debug('Chaurasia greedy heuristics starting')
+    chaurasia_greedy_edges, chaurasia_greedy_weight, chaurasia_greedy_counter = greedyHeuristicsChaurasia(G)
+    logger.info(f'After Chaurasia greedy heuristics with {chaurasia_greedy_counter} simple operations, the best solution for the problem is {chaurasia_greedy_edges} with weight {chaurasia_greedy_weight}.')
+
 
     # Prepare plots
     if args['plot'] or args['save']:
@@ -267,15 +332,23 @@ def main():
         nx.draw_networkx_edges(G, pos, edgelist=list(max_connection_greedy_edges), edge_color='r', width=2)
         nx.draw_networkx_edge_labels(G, pos, edge_labels)
 
+        f4 = plt.figure(4, figsize=(2560*px, 1440*px))
+        plt.title("Chaurasia Greedy Heuristics")
+        nx.draw_networkx(G, pos)
+        nx.draw_networkx_edges(G, pos, edgelist=list(chaurasia_greedy_edges), edge_color='r', width=2)
+        nx.draw_networkx_edge_labels(G, pos, edge_labels)
+
         if args['save']:
             f1.savefig(f'../report/figs/fig-{n}-{p}-exhaustive.png')
             f2.savefig(f'../report/figs/fig-{n}-{p}-min-weight-greedy.png')
             f3.savefig(f'../report/figs/fig-{n}-{p}-max-connection-greedy.png')
+            f4.savefig(f'../report/figs/fig-{n}-{p}-chaurasia-greedy.png')
             logger.info('Figures saved')
         elif args['plot']:
             f1.show()
             f2.show()
             f3.show()
+            f4.show()
             input()
 
 
