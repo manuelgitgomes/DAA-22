@@ -131,7 +131,8 @@ def exhaustiveSearch(G):
     
     return min_edges, min_weight, counter
 
-def greedyHeuristics(G):
+
+def greedyHeuristicsMinWeight(G):
     counter = 0
     min_weight = 0 
     weight_list = []
@@ -157,6 +158,50 @@ def greedyHeuristics(G):
     
     return min_edges, min_weight, counter
 
+
+def greedyHeuristicsMaxConnection(G):
+    counter = 0
+    min_weight  = 0 
+    nodes_edges_list = []
+    edges_list = []
+    connection_list = []
+    min_edges = []
+    weight_list = []
+    
+    # Get number of edges per node
+    for node in G.nodes():
+        nodes_edges_list.append(list(G.edges(node)))
+    
+    # Get edges weight
+    for edge in G.edges():
+        weight_list.append(G.edges[edge]['weight'])
+
+    # Get number of connecting edges to a certain edge
+    for edge in G.edges():
+        node_connecting_list = []
+        node_connecting_list.extend(nodes_edges_list[edge[0]-1])
+        node_connecting_list.extend(nodes_edges_list[edge[1]-1])
+        node_connecting_list = [*set(tuple(sorted(t)) for t in node_connecting_list)]
+        connection_list.append(len(node_connecting_list))
+
+    def sortWeight(tuple):
+        return tuple[2]
+    
+    # Order edges by connection
+    edges_list = list(zip(connection_list, G.edges(), weight_list))
+    edges_list.sort(key=lambda x: (-x[0], x[2], x[1][0], x[1][1]))
+
+    for connection, edge, weight in edges_list:
+        counter += 1
+        min_edges.append(edge)
+        min_weight += weight
+        
+        condition = verifyCondition(min_edges, G)
+        
+        if condition:
+            break
+    
+    return min_edges, min_weight, counter
 
 
 
@@ -194,8 +239,10 @@ def main():
 
     # Greedy heuristics
     logger.debug('Greedy heuristics starting')
-    greedy_edges, greedy_weight, greedy_counter = greedyHeuristics(G)
-    logger.info(f'After greedy heuristics with {greedy_counter} simple operations, the best solution for the problem is {tuple(greedy_edges)} with weight {greedy_weight}.')
+    min_weight_greedy_edges, min_weight_greedy_weight, min_weight_greedy_counter = greedyHeuristicsMinWeight(G)
+    logger.info(f'After minimum weight greedy heuristics with {min_weight_greedy_counter} simple operations, the best solution for the problem is {min_weight_greedy_edges} with weight {min_weight_greedy_weight}.')
+    max_connection_greedy_edges, max_connection_greedy_weight, max_connection_greedy_counter = greedyHeuristicsMaxConnection(G)
+    logger.info(f'After maximum connection greedy heuristics with {max_connection_greedy_counter} simple operations, the best solution for the problem is {max_connection_greedy_edges} with weight {max_connection_greedy_weight}.')
 
     # Prepare plots
     if args['plot'] or args['save']:
@@ -203,24 +250,32 @@ def main():
         px = 1/plt.rcParams['figure.dpi']
 
         f1 = plt.figure(1, figsize=(2560*px, 1440*px))
-        plt.title("Practical Assignment 1 - Exhaustive Search")
+        plt.title("Exhaustive Search")
         nx.draw_networkx(G, pos)
-        nx.draw_networkx_edges(G, pos, edgelist=list(min_edges), edge_color='r')
+        nx.draw_networkx_edges(G, pos, edgelist=list(min_edges), edge_color='r', width=2)
         nx.draw_networkx_edge_labels(G, pos, edge_labels) 
 
         f2 = plt.figure(2, figsize=(2560*px, 1440*px))
-        plt.title("Practical Assignment 1 - Greedy Heuristics")
+        plt.title("Minimum Weight Greedy Heuristics")
         nx.draw_networkx(G, pos)
-        nx.draw_networkx_edges(G, pos, edgelist=list(greedy_edges), edge_color='r')
+        nx.draw_networkx_edges(G, pos, edgelist=list(min_weight_greedy_edges), edge_color='r', width=2)
+        nx.draw_networkx_edge_labels(G, pos, edge_labels)
+
+        f3 = plt.figure(3, figsize=(2560*px, 1440*px))
+        plt.title("Maximum Connections Greedy Heuristics")
+        nx.draw_networkx(G, pos)
+        nx.draw_networkx_edges(G, pos, edgelist=list(max_connection_greedy_edges), edge_color='r', width=2)
         nx.draw_networkx_edge_labels(G, pos, edge_labels)
 
         if args['save']:
             f1.savefig(f'../report/figs/fig-{n}-{p}-exhaustive.png')
-            f2.savefig(f'../report/figs/fig-{n}-{p}-greedy.png')
+            f2.savefig(f'../report/figs/fig-{n}-{p}-min-weight-greedy.png')
+            f3.savefig(f'../report/figs/fig-{n}-{p}-max-connection-greedy.png')
             logger.info('Figures saved')
         elif args['plot']:
             f1.show()
             f2.show()
+            f3.show()
             input()
 
 
