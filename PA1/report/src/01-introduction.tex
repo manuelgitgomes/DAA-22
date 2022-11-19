@@ -1,0 +1,15 @@
+\section{Introduction}\label{section:introduction}
+Consider a finite, undirected graph $G(V,E)$ , where $V$ is the set of graph vertices and $E$ is the set of graph edges.
+Two vertices $u, v$ of $G$ connected by edge $(u,v)$ are called adjacent nodes.
+Two edges which share a vertex are also called adjacent.
+One edge \emph{dominates} its adjacent.
+A set of edges $M$ of $G$ is called an \emph{edge dominating set} if all edges of set $E - M$ are adjacent, and thus dominated, by the edges of $M$ \cite{dominating}.
+The weight of an edge dominating set is the sum of its edges' weight. 
+A \emph{minimum weight edge dominating set} is an edge dominating set whose total weight is as small as possible.
+
+The objective behind this report is to apply exhaustive search and greedy algorithms to retrieve the minimum weight edge dominating set for a general graph $G$.
+The report is divided in five section: the first (\autoref{section:introduction}), where the problem is introduced;
+the second (\autoref{section:algorithms-used}), where the algorithms used are described;
+the third (\autoref{section:formal-analysis}), where a formal analysis for the algorithms is presented;
+the fourth (\autoref{section:results}), where results for experiments conducted with the algorithms are detailed;
+and the fifth (\autoref{section:conclusions}), where conclusions are extracted.
