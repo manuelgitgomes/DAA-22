@@ -1,1 +1,155 @@
 \section{Algorithms Used}\label{section:algorithms-used}
+To retrieve the minimum weight dominating set of a graph $G$, two different types of algorithm were used.
+The first algorithm was an exhaustive search algorithm, while the rest followed a greedy heuristics.
+
+\subsection{Exhaustive Search}\label{section:exhaustive-search}
+
+Exhaustive search is a brute-force approach to combinatorial problems that consists of generating every element of the problem domain, verify if it fulfils a specific condition and then finding a desired element \cite{levitin2012introduction}.
+
+The exhaustive search used for the problem at hand is based on generating every possible combination of edges of the graph.
+Then, for every single combination, verify it is a dominating set.
+If so, compute the sum of weights of every edge that belongs to the combination.
+Then, compare that sum with the current minimum weight.
+If the sum is smaller than the minimum, the combination is a better solution than the current minimum set.
+Therefore, the combination at hand is the now the current best solution and the sum of the weights is the current minimum weight.
+This algorithm is better illustrated in \autoref{alg:exhaustive}.
+
+\begin{algorithm}
+\caption{Exhaustive search algorithm}
+\label{alg:exhaustive}
+\begin{algorithmic}
+\Inputs{$G(V,E) \gets$ graph with set of vertices $V$ and set of edges $E$}
+\Initialize{$l_c \gets$ list of every combination of edges in $E$
+
+$w_{min} \gets \infty$
+
+$set_{min} \gets [\cdot]$}
+
+\For{$c$ in $l_c$}
+    \If{$c$ is dominating set of $G(V,E)$}
+
+        $w_c = \sum$ weight of edges in $c$
+        
+        \If{$w_c < w_{min}$}
+
+           \State $w_{min} \gets w_c$
+           \State $set_{min} \gets c$
+
+        \EndIf        
+    \EndIf
+
+\EndFor
+
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Greedy Heuristics}
+A greedy approach is a general design technique applicable to optimization problems.
+It consists a solution through a set of steps, expanding a partially constructed solution along them.
+On each step, a choice need to take place.
+That choice needs to be: feasible, so it satisfies the problem's constraints; locally optimal, i.e., it has to be the best possible choice among all feasible choices available; and irreversible, i.e., the choice, once made, cannot be changed \cite{levitin2012introduction}.
+
+For the current problem, three different greedy heuristics were developed: minimum weight, maximum connection and one based on the work of Chaurasia and Singh\cite{chaurasia}.
+
+In the first one, edges of the graph are sorted in ascending order by weight. 
+Then, the edge with the least weight is added to the solution set.
+The solution set is checked to verify if it is a dominating set.
+If so, the solution is found and the algorithm stops.
+If not, add the next edge to the solution edge.
+The algorithm is described in \autoref{alg:min-weight}. 
+
+\begin{algorithm}
+\caption{Minimum weight greedy heuristics}
+\label{alg:min-weight}
+\begin{algorithmic}
+\Inputs{$G(V,E) \gets$ graph with set of vertices $V$ and set of edges $E$}
+\Initialize{$l_{E,W} \gets$ list of $E$ with corresponding set of weights $W$
+
+$w_{min} \gets 0$
+
+$set_{min} \gets [\cdot]$}
+
+
+\State $l_{E,W-sorted} = l_{E,W}$ sorted in ascending order by weight
+\For{$edge,\ weight$ in $l_{E,W-sorted}$}
+
+    \State $set_{min} \gets$ add $edge$
+    \State $w_{min} += weight$
+    \If{$set_{min}$ is dominating set of $G(V,E)$}
+
+        \State \textbf{break}
+    \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+The second one is similar to the first, with the difference lying in the sorting step.
+Instead of sorting in ascending order by weight, this heuristics sorts the edges in descending order by number of adjacent edges, as seen in \autoref{alg:max-connection}.
+
+\begin{algorithm}
+\caption{Maximum connection greedy heuristics}
+\label{alg:max-connection}
+\begin{algorithmic}
+\Inputs{$G(V,E) \gets$ graph with set of vertices $V$ and set of edges $E$}
+\Initialize{$l_{E,W,NA} \gets$ list of $E$ with corresponding sets of weights $W$ and of the number of adjacent edges $NA$
+
+$w_{min} \gets 0$
+
+$set_{min} \gets [\cdot]$}
+
+
+\State $l_{E,W,NA-sorted} = l_{E,W,NA}$ sorted in descending order by number of adjacent edges
+\For{$edge,\ weight,\ n_{adjacent}$ in $l_{E,W,NA-sorted}$}
+
+    \State $set_{min} \gets$ add $edge$
+    \State $w_{min} += weight$
+    \If{$set_{min}$ is dominating set of $G(V,E)$}
+
+        \State \textbf{break}
+    \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+% \newpage
+The third greedy algorithm is based on the work by Chaurasia-Singh\cite{chaurasia}.
+In this algorithm, a weight ratio for a certain edge is calculated by dividing the sum of the weights of its adjacent edges with its weight.
+The edges are then sorted in descending order by their weight ratio.
+The algorithm is exemplified in \autoref{alg:chaurasia}.
+
+\newpage
+
+\begin{algorithm}
+\caption{Chaurasia-Singh greedy heuristics}
+\label{alg:chaurasia}
+\begin{algorithmic}
+\Inputs{$G(V,E) \gets$ graph with set of vertices $V$ and set of edges $E$}
+\Initialize{$l_{E,W,A,W_{A}} \gets$ list of $E$ with corresponding sets of weights $W$, of adjacent edges $A$ and of weight of adjacent edges $W_A$}
+
+$w_{min} \gets 0$
+
+$set_{min} \gets [\cdot]$
+
+$l_{W_{r} \gets [\cdot]}$
+
+\For{$edge,\ weight,\ edges_{adjacents}, weight_{adjacents}$ in $l_{E,W,A,W_{A}}$}
+    
+    $W_{ratio} = weight_{adjacents} / weight$
+    \State $l_{W_{r}} \gets$ add $W_{ratio}$
+
+\EndFor
+
+\State $l_{E,W,A,W_{A},W_{r}} \gets [l_{E,W,A,W_{A}},\ l_{W_{r}}]$
+
+\State $l_{E,W,A,W_{A},W_{r}-sorted} = l_{E,W,A, W_{A}, W_{r}}$ sorted in descending order by weight ratio $w_r$
+\For{$edge,\ weight,\ edges_{adjacent},\ weight_{adjacent}, weight_{ratio}$ in $l_{E-W-Asorted}$}
+
+    \State $set_{min} \gets$ add $edge$
+    \State $w_{min} += weight$
+    \If{$set_{min}$ is dominating set of $G(V,E)$}
+
+        \State \textbf{break}
+    \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
