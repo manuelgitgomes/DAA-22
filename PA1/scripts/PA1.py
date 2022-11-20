@@ -126,6 +126,7 @@ def exhaustiveSearch(G):
         min_edges (tuple): edges who verify the condition
     """
     counter = 0
+    verified_counter = 0
     min_weight = np.inf
     min_edges = None
     # Create a list of every combination of edges in the graph G
@@ -138,6 +139,7 @@ def exhaustiveSearch(G):
         counter += 1
         condition = verifyCondition(combination, G)
         if condition:
+            verified_counter += 1
             weight = 0
             for edge in combination:
                 weight += G.edges[edge]['weight']
@@ -149,7 +151,7 @@ def exhaustiveSearch(G):
             else:
                 logger.debug(f'Weight of current combination ({weight}) is equal or larger than current minimum weight ({min_weight}).')
     
-    return min_edges, min_weight, counter
+    return min_edges, min_weight, counter, verified_counter
 
 
 def greedyHeuristicsMinWeight(G):
@@ -334,7 +336,7 @@ def main():
             # Prepare exhaustive search
             logger.debug('Exhaustive search starting')
             min_start_time = time.time()
-            min_edges, min_weight, counter = exhaustiveSearch(G)
+            min_edges, min_weight, counter, verified_counter = exhaustiveSearch(G)
             min_execution_time = (time.time() - min_start_time)
             logger.info(f'After exhaustive search with {counter} simple operations and taking {min_execution_time} seconds, the best solution for the problem is {min_edges} with weight {min_weight}.')
 
@@ -359,9 +361,9 @@ def main():
 
             # Save CSV
             if args['csv']:
-                filename = '../report/data/full_data.csv'
+                filename = '../report/data/full_data2.csv'
                 fields = ['n', 'p', 'E','Algorithm', 'Edges', 'Weight', 'Number of Solutions Tested', 'Execution Time', 'Number of Basic Operations', 'Relative Error', 'Accuracy Ratio']
-                rows.append([n, p, len(G.edges()), 'Exhaustive Search', min_edges, min_weight, counter, min_execution_time, counter, 'NA', 'NA'])
+                rows.append([n, p, len(G.edges()), 'Exhaustive Search', min_edges, min_weight, verified_counter, min_execution_time, counter, 'NA', 'NA'])
                 rows.append([n, p, len(G.edges()), 'Minimum Weight Greedy Heuristics', min_weight_greedy_edges, min_weight_greedy_weight, min_weight_greedy_counter, min_weight_greedy_execution_time, min_weight_greedy_counter, (min_weight_greedy_weight-min_weight)/min_weight, min_weight_greedy_weight/min_weight])
                 rows.append([n, p, len(G.edges()), 'Maximum Connection Greedy Heuristics', max_connection_greedy_edges, max_connection_greedy_weight, max_connection_greedy_counter, max_connection_greedy_execution_time, max_connection_greedy_counter, (max_connection_greedy_weight-min_weight)/min_weight, max_connection_greedy_weight/min_weight])
                 rows.append([n, p, len(G.edges()), 'Chaurasia Greedy Heuristics', chaurasia_greedy_edges, chaurasia_greedy_weight, chaurasia_greedy_counter, chaurasia_greedy_execution_time, chaurasia_greedy_counter, (chaurasia_greedy_weight-min_weight)/min_weight, chaurasia_greedy_weight/min_weight])
@@ -374,25 +376,25 @@ def main():
                 edge_labels = nx.get_edge_attributes(G, "weight")
                 px = 1/plt.rcParams['figure.dpi']
 
-                f1 = plt.figure(1, figsize=(2560*px, 1440*px))
+                f1 = plt.figure(1, figsize=(1280*px, 720*px))
                 plt.title("Exhaustive Search")
                 nx.draw_networkx(G, pos)
                 nx.draw_networkx_edges(G, pos, edgelist=list(min_edges), edge_color='r', width=2)
                 nx.draw_networkx_edge_labels(G, pos, edge_labels) 
 
-                f2 = plt.figure(2, figsize=(2560*px, 1440*px))
+                f2 = plt.figure(2, figsize=(1280*px, 720*px))
                 plt.title("Minimum Weight Greedy Heuristics")
                 nx.draw_networkx(G, pos)
                 nx.draw_networkx_edges(G, pos, edgelist=list(min_weight_greedy_edges), edge_color='r', width=2)
                 nx.draw_networkx_edge_labels(G, pos, edge_labels)
 
-                f3 = plt.figure(3, figsize=(2560*px, 1440*px))
+                f3 = plt.figure(3, figsize=(1280*px, 720*px))
                 plt.title("Maximum Connections Greedy Heuristics")
                 nx.draw_networkx(G, pos)
                 nx.draw_networkx_edges(G, pos, edgelist=list(max_connection_greedy_edges), edge_color='r', width=2)
                 nx.draw_networkx_edge_labels(G, pos, edge_labels)
 
-                f4 = plt.figure(4, figsize=(2560*px, 1440*px))
+                f4 = plt.figure(4, figsize=(1280*px, 720*px))
                 plt.title("Chaurasia Greedy Heuristics")
                 nx.draw_networkx(G, pos)
                 nx.draw_networkx_edges(G, pos, edgelist=list(chaurasia_greedy_edges), edge_color='r', width=2)
