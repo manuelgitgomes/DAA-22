@@ -30,6 +30,7 @@
 \usepackage{algpseudocode}
 \usepackage{graphicx}
 \usepackage{multirow}
+\usepackage{titlesec}
 \algnewcommand{\Inputs}[1]{%
   \State \textbf{Inputs:}
   \Statex \hspace*{\algorithmicindent}\parbox[t]{.8\linewidth}{\raggedright #1}
@@ -39,6 +40,8 @@
   \Statex \hspace*{\algorithmicindent}\parbox[t]{.8\linewidth}{\raggedright #1}
 }
 \newcommand{\algorithmautorefname}{Algorithm}
+
+\titleclass{\section}{straight}
 
 \begin{document}
 
@@ -50,11 +53,17 @@
 \maketitle
 
 \begin{abstract}% Note: in English
-  ...
+This report present four algorithms to solve a minimum weight dominating set graph problem.
+The first one is an exhaustive search algorithm, while the rest are based on greedy heuristics.
+A formal analysis is presented for each algorithm.
+After their implementation in Python 3, an experimental analysis of each algorithm is described.
 \end{abstract}
 
 \begin{resumo}% Note: in Portuguese
-  ...
+Este relatório apresenta quatro algoritmos com o objetivo resolver o problema de grafos "minimum weight dominating set".
+O primeiro é um algoritmo de procura extensiva, enquanto que o resto são baseados em heurísticas vorazes.
+Uma análise formal é apresentada para cada algoritmo.
+Após a sua implementação em Python 3, uma análise experimental de cada algoritmo é descrita.
 \end{resumo}
 
 % \begin{keywords}% Note: in English (optional)
@@ -66,11 +75,11 @@
 % \end{palavraschave}
 
 
-\include{src/01-introduction}
-\include{src/02-algorithms-used}
-\include{src/03-formal-analysis}
-\include{src/04-results}
-\include{src/05-conclusions}
+\input{src/01-introduction}
+\input{src/02-algorithms-used}
+\input{src/03-formal-analysis}
+\input{src/04-results}
+\input{src/05-conclusions}
 
 \bibliography{references.bib}
 % \bibliography{...} % use a field named url or \url{} for URLs

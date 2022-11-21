@@ -1,7 +1,7 @@
 %% 
 %% This is file `revdetua.cls'
 %%
-%% Created by Tom·s Oliveira e Silva on March 1996 (current version, January 2012)
+%% Created by Tom√°s Oliveira e Silva on March 1996 (current version, January 2012)
 %%
 %% Based on article.cls, and the old ieeetran.sty
 %% 

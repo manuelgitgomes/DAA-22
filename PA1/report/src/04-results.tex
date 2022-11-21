@@ -1,13 +1,13 @@
 \section{Results}\label{section:results}
 After implementing the algorithms described in \autoref{section:algorithms-used}, experimental results were retrieved.
 These results range from number of operation, elapsed time and relative error.
-The results were taken in a machine with the AMD Ryzen 5 5600X processor.
+The results were taken in a machine with the AMD Ryzen 5 5600X processor and implemented in Python 3.
 
 For the exhaustive search algorithm, the results obtained are presented in \autoref{tab:ex-table}, \autoref{fig:ex-op}, and \autoref{fig:ex-time}.
 In \autoref{tab:ex-table}, $V$ and $E$ are the number of vertices and edges of the graph; $p$ is the fraction between $E$ and the maximum number of edges; execution time is the time elapsed during the computation of the algorithm;
 number of basic operations is how many basic operations (defined in \autoref{section:formal-analysis}) took place; number of dominating sets is the number of sets generated that were dominating sets; and the time per operation is the estimated elapsed time for a basic operation.
-From this data we can verify that the number of basic operations presents an exponential order of growth, following the behavior expected by \autoref{eq:ex-closed-formula} and \autoref{eq:ex-big-o}.
-The execution time also presents an exponential growth with the number of edges.
+From this data we can verify that the number of basic operations presents an exponential order of growth ($1^{0.693x}=2^x$, $R^2=1$, \autoref{fig:ex-op}), following the behavior expected by \autoref{eq:ex-closed-formula} and \autoref{eq:ex-big-o}.
+The execution time also presents an exponential growth ($2.74e\scalebox{0.5}[1.0]{\( - \)}5^{0.712x}$, $R^2=1$, \autoref{fig:ex-time}) with the number of edges.
 The time per basic operation in seconds is $3,71e\scalebox{0.5}[1.0]{\( - \)}5 \pm 8,36e{\scalebox{0.5}[1.0]{\( - \)}6}$.
 From these experiences, the largest graph able to be computed was one with 9 vertices and 23 edges (\autoref{fig:9-05-ex}).
 \autoref{eq:ex-time-calc} is used to calculate how long a computation takes using the same hardware.
@@ -82,7 +82,7 @@ From these experiences, the largest graph able to be computed was one with 9 ver
 For the minimum weight greedy heuristics, the results obtained are presented in \autoref{tab:minw-table}, \autoref{fig:minw-sol}, \autoref{fig:minw-time}, and \autoref{fig:minw-ratio}. 
 The columns for \autoref{tab:minw-table} are equal to the ones in \autoref{tab:ex-table}, with the exception of: number of solutions tested, which is the number of sets tested before a dominating one was formed; and accuracy ratio, which is a measure used to compare the weight of the solution obtained with the weight of the optimal solution. 
 This data verifies that the number of solutions tested grows with the number of edges.
-The correlation between the elapsed time and the number of edges presents a form of a $nlog_2(n)$ function, verifying the hypothesis formed in \autoref{eq:greedy-big-o}.
+The elapsed time increases with the number of edges.
 From the accuracy ratio, it can be inferred that the algorithm is relatively accurate in smaller graph, becoming less accurate in larger graphs.
 
 
@@ -149,12 +149,12 @@ From the accuracy ratio, it can be inferred that the algorithm is relatively acc
 
 For the maximum connection greedy heuristics, the results obtained are presented in \autoref{tab:maxc-table}, \autoref{fig:maxc-sol}, \autoref{fig:maxc-time}, and \autoref{fig:maxc-ratio}. 
 The columns for \autoref{tab:maxc-table} are equal to the ones in \autoref{tab:minw-table}.
-The data shows that the number of solutions tested grows with the number of edges, however, is smaller than the previous heuristics.
-As with the previous algorithm, the correlation between the elapsed time and the number of edges presents a form of a $nlog_2(n)$ function, further verifying the hypothesis formed in \autoref{eq:greedy-big-o}.
+The data shows that the number of solutions tested grows with the number of edges.
+However, this growth is smaller than the previous heuristics.
+The elapsed time increases with the number of edges, very similarly to the previous heuristics.
 With the accuracy ratio, it can be stated that the algorithm, although not completely inaccurate, is not particularly accurate in smaller graphs.
 However, the inaccuracy does not seem to grow, at least not in a noticeable rate, for larger graphs.
 
-\newpage
 
 \begin{table}[ht!]
 \caption{Results from maximum connection greedy algorithm}
@@ -207,7 +207,6 @@ However, the inaccuracy does not seem to grow, at least not in a noticeable rate
     \label{fig:maxc-time}
 \end{figure}
 
-\newpage
 
 \begin{figure}[!ht]
     \centering
@@ -218,12 +217,10 @@ However, the inaccuracy does not seem to grow, at least not in a noticeable rate
 
 For the Chaurasia-Singh greedy heuristics, the results obtained are presented in \autoref{tab:chaurasia-table}, \autoref{fig:chaurasia-sol}, \autoref{fig:chaurasia-time}, and \autoref{fig:chaurasia-ratio}. 
 The columns for \autoref{tab:chaurasia-table} are equal to the ones in \autoref{tab:minw-table}.
-The data shows that the number of solutions tested grows with the number of edges, similar to the previous heuristics.
-As with the previous algorithms, the correlation between the elapsed time and the number of edges presents a form of a $nlog_2(n)$ function, further verifying the hypothesis formed in \autoref{eq:greedy-big-o}.
-The accuracy ratio for this algorithm is smaller then the two previous one.
-This fact allows to affirm that this heuristics is more accurate than the preceding.
+The data shows that the number of solutions tested grows with the number of edges, similar to both previous heuristics.
+The elapsed time increases with the number of edges, very similarly to both previous heuristics.
+The accuracy ratio for this algorithm is smaller then the two previous ones.
 
-\newpage
 
 \begin{table}[ht!]
 \caption{Results from Chaurasia-Singh greedy algorithm}

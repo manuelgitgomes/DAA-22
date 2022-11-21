@@ -7,7 +7,7 @@ The first algorithm was an exhaustive search algorithm, while the rest followed 
 Exhaustive search is a brute-force approach to combinatorial problems that consists of generating every element of the problem domain, verify if it fulfils a specific condition and then finding a desired element \cite{levitin2012introduction}.
 
 The exhaustive search used for the problem at hand is based on generating every possible combination of edges of the graph.
-Then, for every single combination, verify it is a dominating set.
+Then, for every single combination, verify if it is a dominating set.
 If so, compute the sum of weights of every edge that belongs to the combination.
 Then, compare that sum with the current minimum weight.
 If the sum is smaller than the minimum, the combination is a better solution than the current minimum set.
@@ -46,7 +46,7 @@ $set_{min} \gets [\cdot]$}
 \subsection{Greedy Heuristics}
 A greedy approach is a general design technique applicable to optimization problems.
 It consists a solution through a set of steps, expanding a partially constructed solution along them.
-On each step, a choice need to take place.
+On each step, a choice needs to take place.
 That choice needs to be: feasible, so it satisfies the problem's constraints; locally optimal, i.e., it has to be the best possible choice among all feasible choices available; and irreversible, i.e., the choice, once made, cannot be changed \cite{levitin2012introduction}.
 
 For the current problem, three different greedy heuristics were developed: minimum weight, maximum connection and one based on the work of Chaurasia and Singh\cite{chaurasia}.
@@ -113,18 +113,17 @@ $set_{min} \gets [\cdot]$}
 
 % \newpage
 The third greedy algorithm is based on the work by Chaurasia-Singh\cite{chaurasia}.
-In this algorithm, a weight ratio for a certain edge is calculated by dividing the sum of the weights of its adjacent edges with its weight.
+In this algorithm, a weight ratio for a certain edge is calculated by dividing the sum of the weights of its adjacent edges by the weight of the edge itself.
 The edges are then sorted in descending order by their weight ratio.
 The algorithm is exemplified in \autoref{alg:chaurasia}.
 
-\newpage
 
 \begin{algorithm}
 \caption{Chaurasia-Singh greedy heuristics}
 \label{alg:chaurasia}
 \begin{algorithmic}
 \Inputs{$G(V,E) \gets$ graph with set of vertices $V$ and set of edges $E$}
-\Initialize{$l_{E,W,A,W_{A}} \gets$ list of $E$ with corresponding sets of weights $W$, of adjacent edges $A$ and of weight of adjacent edges $W_A$}
+\Initialize{$l_{E,W,W_{A}} \gets$ list of $E$ with corresponding sets of weights $W$, and of weight of adjacent edges $W_A$}
 
 $w_{min} \gets 0$
 
@@ -132,17 +131,17 @@ $set_{min} \gets [\cdot]$
 
 $l_{W_{r} \gets [\cdot]}$
 
-\For{$edge,\ weight,\ edges_{adjacents}, weight_{adjacents}$ in $l_{E,W,A,W_{A}}$}
+\For{$edge,\ weight,\ weight_{adjacents}$ in $l_{E,W,W_{A}}$}
     
     $W_{ratio} = weight_{adjacents} / weight$
     \State $l_{W_{r}} \gets$ add $W_{ratio}$
 
 \EndFor
 
-\State $l_{E,W,A,W_{A},W_{r}} \gets [l_{E,W,A,W_{A}},\ l_{W_{r}}]$
+\State $l_{E,W,W_{A},W_{r}} \gets [l_{E,W,W_{A}},\ l_{W_{r}}]$
 
-\State $l_{E,W,A,W_{A},W_{r}-sorted} = l_{E,W,A, W_{A}, W_{r}}$ sorted in descending order by weight ratio $w_r$
-\For{$edge,\ weight,\ edges_{adjacent},\ weight_{adjacent}, weight_{ratio}$ in $l_{E-W-Asorted}$}
+\State $l_{E,W,W_{A},W_{r}-sorted} = l_{E,W, W_{A}, W_{r}}$ sorted in descending order by weight ratio $w_r$
+\For{$edge,\ weight,\ weight_{adjacent}, weight_{ratio}$ in $l_{E,W,W_{A},W_{r}-sortedE-W-Asorted}$}
 
     \State $set_{min} \gets$ add $edge$
     \State $w_{min} += weight$
