@@ -1,25 +1,22 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Motivation}
+\subsection{Experimental Setup}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{Sensor Calibration}
+\frametitle{Datasets Used}
 
 \begin{columns}
 \column{0.5\textwidth}
-% With the development of more complex robotic and intelligent systems, many now contain \textbf{several sensors, often of multiple modalities}
 
-% \pause
-\begin{block}{}
-Multi-sensor or multi-modal perceptual systems operate under the assumption that accurate geometrical
-transformations between the sensors that collect the data are known
-\end{block}
+\begin{itemize}
+    \item Large scale datasets
+\end{itemize}
 
 \column{0.5\textwidth}
 \begin{center}
 \begin{tabular}{c}
-\onslide<1->\includegraphics[width=0.8\textwidth]{img/pr2/pr2_a}
+\onslide<1->\includegraphics[width=0.8\textwidth]{img/datasets}
 % \includegraphics[width=0.8\textwidth]{img/pr2/pr2_a}
 \end{tabular}
 \end{center}
@@ -27,17 +24,58 @@ transformations between the sensors that collect the data are known
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}
-\frametitle{ATOM Calibration Framework}
+\frametitle{Evaluation Metrics}
 \begin{columns}
 \column{0.5\textwidth}
 
 \begin{itemize}
-    \item A general sensor calibration framework
-    \item Based on an optimization algorithm
-    \item Potential for enhancement
+    \item $P = \frac{|S'_a \cap S_a|}{|S'_a|}$
+    \begin{itemize}
+        \item Not sensitive to false negatives
+    \end{itemize} 
+    \item $R = \frac{|S'_a \cap S_a|}{|S_a|}$
+    \begin{itemize}
+        \item Not sensitive to false positives
+    \end{itemize} 
+    \item $F1 = \frac{2*P*R}{P+R}$
 \end{itemize}
 
+\begin{block}{}
+    \begin{itemize}
+        \item $S_a$ - real author set
+        \item $S'_a$ - returned author set
+    \end{itemize}
+\end{block}
+
 \column{0.5\textwidth}
+\onslide<1->\includegraphics[width=0.8\textwidth]{img/datasets}
 \end{columns}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Comparison and Analysis}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Results}
+\centering
+\onslide<1->\includegraphics[width=0.8\textwidth]{img/aminer1}
+\onslide<1->\includegraphics[width=0.8\textwidth]{img/aminer2}
+
+% \begin{columns}
+% \column{0.5\textwidth}
+
+% \begin{itemize}
+%     \item Large scale datasets
+% \end{itemize}
+
+% \column{0.5\textwidth}
+% \begin{center}
+% \begin{tabular}{c}
+% \onslide<1->\includegraphics[width=0.8\textwidth]{img/datasets}
+% % \includegraphics[width=0.8\textwidth]{img/pr2/pr2_a}
+% \end{tabular}
+% \end{center}
+% \end{columns}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
