@@ -1,0 +1,124 @@
+\documentclass[10pt,xcolor={dvipsnames}]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+
+\usetheme{Copenhagen}
+\usecolortheme{seagull}
+
+%\usepackage{media9}
+\usepackage{multimedia}
+
+\usepackage{booktabs,siunitx}
+\usepackage{multirow}
+\usepackage[flushleft]{threeparttable}
+
+
+\usepackage{amsmath}
+\usepackage{stmaryrd}
+
+\usepackage{tikz}
+\usepackage{amsfonts}
+\usepackage{xcolor}
+\usepackage{biblatex}
+\usepackage{hyperref}
+\tiny\bibliography{references.bib}
+\usetikzlibrary{calc}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argminB}{argmin}
+
+\definecolor{red}{rgb}{1.00,0.00,0.00}
+\definecolor{blue}{rgb}{0.00,0.00,1.00}
+\definecolor{dblue}{rgb}{0.00,0.00,0.40}
+\definecolor{green}{rgb}{0.4,1.00,0.0}
+\definecolor{dgreen}{rgb}{0.0,0.40,0.0}
+\definecolor{yellow}{rgb}{0.5,0.5,0.0}
+
+%\renewcommand<>{\item}[1]{\only#2{\beameroriginal{\item}{#1}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%---
+%This block of code defines the information to appear in the
+%Title page
+\title[]
+{Author Set Identification via Quasi-Clique Discovery}
+
+\subtitle{A presentation for DAA 2022/2023}
+
+\author[Manuel Alberto Silva Gomes] % (optional)
+{Manuel Gomes}
+
+% \institute[VFU] % (optional)
+% {
+%   \inst{1}%
+%   Institute of Electronics and Informatics Engineering of Aveiro\\
+%   University of Aveiro, Portugal
+%   \and
+%   \inst{2}%
+%   Department of Mechanical Engineering\\
+%   University of Aveiro, Portugal
+% }
+
+\date[2023/01/06] % (optional)
+{06/01/2023}
+
+\titlegraphic{\begin{center}
+\begin{tabular}{c}
+%\includegraphics[height=1cm]{img/cytedlogo} &
+\includegraphics[height=1cm]{img/Logo-UA-300x300} 
+\end{tabular}
+\end{center}
+}
+
+\setbeamertemplate{footline}[frame number]
+
+%End of title page configuration block
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%---
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%---
+%The next block of commands puts the table of contents at the 
+%beginning of each section and highlights the current section:
+
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Table of Contents}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%---
+
+
+\begin{document}
+
+%The next statement creates the title page.
+\frame{\titlepage}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%This block of code is for the table of contents after
+%the title page
+\begin{frame}
+\frametitle{Table of Contents}
+\tableofcontents
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\include{src/01-introduction}
+% \section{Related Work}
+% \include{src/02-related}
+\section{Proposed Approach}
+\include{src/03-approach}
+\section{Results}
+\include{src/04-results}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
+
