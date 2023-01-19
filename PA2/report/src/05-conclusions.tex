@@ -1,0 +1,13 @@
+\section{Conclusions}\label{section:conclusions}
+In this report, four different algorithm to solve the minimum weight dominating set problem were proposed.
+The first one is an exhaustive search algorithm, which based on its formal analysis it can be concluded that it is time-consuming but it guarantees an optimal solution.
+The next three are greedy algorithms, which based on their formal analysis, they take less time than the exhaustive one, however, the solution is not guaranteed to be optimal.
+The greedy algorithm are based on three different choices: choosing the edges with minimum weigh, choosing the edges with maximum number of connections, and choosing the edges with the largest ratio between the weight of adjacent edges and the weight of the edge itself.
+
+Results prove that the exhaustive search and the greedy algorithms follow the behavior defined by their formal analysis.
+It is also verified that the most accurate greedy algorithm is the one based on the work of Chaurasia and Singh.
+
+Possible future work on this subject is the testing of exhaustive search in more complex graphs using better hardware, to further verify if it follows its formal analysis.
+Another possible problem to tackle is the sorting in the greedy algorithms.
+Currently, the sorting used was already created, giving the author no control over it, including not being able to verify how many basic operations it performed.
+Still regarding the greedy algorithms, a n-log-n regression could be done on the data retrieved from these algorithms, to verify if it follows their formal analysis

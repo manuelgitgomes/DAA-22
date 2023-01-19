@@ -1,0 +1,88 @@
+%
+% General structure for the revdetua class:
+%
+\documentclass[shortpaper,english,final]{revdetua}
+%
+% Valid options are:
+%
+%   longpaper --------- \part and \tableofcontents defined
+%   shortpaper -------- \part and \tableofcontents not defined (default)
+%
+%   english ----------- main language is English (default)
+%   portugues --------- main language is Portuguese
+%
+%   draft ------------- draft version
+%   final ------------- final version (default)
+%
+%   times ------------- use times (postscript) fonts for text
+%
+%   mirror ------------ prints a mirror image of the paper (with dvips)
+%
+%   visiblelabels ----- \SL, \SN, \SP, \EL, \EN, etc. defined
+%   invisiblelabels --- \SL, \SN, \SP, \EL, \EN, etc. not defined (default)
+%
+% Note: the final version should use the times fonts
+% Note: the really final version should also use the mirror option
+%
+
+\usepackage{amsmath,hyperref}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{titlesec}
+\algnewcommand{\Inputs}[1]{%
+  \State \textbf{Inputs:}
+  \Statex \hspace*{\algorithmicindent}\parbox[t]{.8\linewidth}{\raggedright #1}
+}
+\algnewcommand{\Initialize}[1]{%
+  \State \textbf{Initialize:}
+  \Statex \hspace*{\algorithmicindent}\parbox[t]{.8\linewidth}{\raggedright #1}
+}
+\newcommand{\algorithmautorefname}{Algorithm}
+
+\titleclass{\section}{straight}
+
+\begin{document}
+
+\Header{1}{1}{Novembro}{2022}{1}
+% Note: the month must be in Portuguese
+
+\title{Minimum Weight Dominating Set}
+\author{Manuel Gomes, 88939} % or \author{... \and ...}
+\maketitle
+
+\begin{abstract}% Note: in English
+This report present four algorithms to solve a minimum weight dominating set graph problem.
+The first one is an exhaustive search algorithm, while the rest are based on greedy heuristics.
+A formal analysis is presented for each algorithm.
+After their implementation in Python 3, an experimental analysis of each algorithm is described.
+\end{abstract}
+
+\begin{resumo}% Note: in Portuguese
+Este relatório apresenta quatro algoritmos com o objetivo resolver o problema de grafos "minimum weight dominating set".
+O primeiro é um algoritmo de procura extensiva, enquanto que o resto são baseados em heurísticas vorazes.
+Uma análise formal é apresentada para cada algoritmo.
+Após a sua implementação em Python 3, uma análise experimental de cada algoritmo é descrita.
+\end{resumo}
+
+% \begin{keywords}% Note: in English (optional)
+%   ...
+% \end{keywords}
+
+% \begin{palavraschave}% Note: in Portuguese (optional)
+%   ...
+% \end{palavraschave}
+
+
+\input{src/01-introduction}
+\input{src/02-algorithms-used}
+\input{src/03-formal-analysis}
+\input{src/04-results}
+\input{src/05-conclusions}
+
+\bibliography{references.bib}
+% \bibliography{...} % use a field named url or \url{} for URLs
+% Note: the \bibliographystyle is set automatically
+
+\end{document}
