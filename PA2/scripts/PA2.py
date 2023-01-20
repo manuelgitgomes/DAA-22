@@ -8,6 +8,7 @@ from ebooklib import epub
 from bs4 import BeautifulSoup
 from collections import Counter
 from random import random
+import matplotlib.pyplot as plt
 
 # create logger
 logger = logging.getLogger("PA2")
@@ -154,16 +155,57 @@ def csurosCounter(text, elements_to_remove, stop_words_path, csuros_dict):
     return counts
 
 
+def createBarPlot(counter, top_word_number, file_name):
+    """Creates bar plot from counter
+
+    Args:
+        counter (counter): counter with words and number of occurrences
+        top_word_number (int): Number of words to be displayed in graph
+        file_name (str): Name of file to save the plot
+    """
+    # Find top words
+    top_words = [(word, occurrence) for idx, (word, occurrence) in enumerate(counter.most_common()) if idx < top_word_number]
+    word_list = [tup[0] for tup in top_words]
+    occurrence_list = [tup[1] for tup in top_words]
+    
+    # Create and save figure
+    px = 1/plt.rcParams['figure.dpi']
+    figure = plt.figure(1, figsize=(720*px, 950*px))
+    plt.barh(word_list, occurrence_list, color='firebrick')
+    plt.gca().invert_yaxis()
+    figure.savefig(f'../report/figs/{file_name}.pdf')
+    figure.clear(True)
+
+
+def createAverageCounter(counter_dict):
+    """Create an average counter from a set of counters
+
+    Args:
+        counter_dict (dict): Dictionary of counters, with keys from 0 to k
+
+    Returns:
+        counter: Counter with average values
+    """
+    final_counter = Counter()
+    for i in counter_dict.keys():
+        final_counter += counter_dict[i]
+
+    final_counter = Counter({key: value / len(counter_dict.keys()) for key, value in final_counter.items()})
+    return final_counter
+    
+
+
+
 def main():
     # Define argparse
     ap = argparse.ArgumentParser()
-    ap.add_argument("-n", "--number", help='Number of times to run the probabilistic counters.', type=int, default=10)
     ap.add_argument("-b", "--books", help='List of names of books (.epub) to analyse.', type=list, default=['2004.epub', '2005.epub', '2010.epub'])
     ap.add_argument("-e", "--elements", help='String of elements, such as punctuation, to remove from the text.', type=str, default='.,?!"\'|:;()-—™“')
     ap.add_argument("-s", "--stop_words", help='String of the path of the location of the stop words txt file.', type=str, default='stop_words_english.txt')
     ap.add_argument("-p", "--probability", help='Fixed probabilistic counter probability (< 1)', type=int, default=0.25)
     ap.add_argument("-c", "--csuros", help='Dictionary of parameters to be used by Csuros counter - {"d": int, "p": int}', type=dict, default={'d' : 3, 'p' : 1/2})
-    #TODO add option for running probabilistic counters multiple times, use dictionaries inside fixed_count and csuros_count
+    ap.add_argument("-r", "--repetitions", help='Number of repetitions of the counters', type=int, default=10)
+    ap.add_argument("-t", "--top_words", help='Number of top words to be presented in the bar graphs', type=int, default=20)
     
     # Defining args
     args = vars(ap.parse_args())
@@ -175,16 +217,32 @@ def main():
         book_dict[book]['text'] = readEPub(book)
     logger.info('Retrieved text for every desired epub')
 
+    # Counting
     for book in book_dict.keys():
         book_dict[book]['total_count'] = totalCounter(book_dict[book]['text'], args['elements'], args['stop_words'])
         logger.info(f'Full counter of {book} carried out successfully')
+        
+        book_dict[book]['fixed_count'] = dict()
+        book_dict[book]['csuros_count'] = dict()
+        for i in range(args['repetitions']):
+            book_dict[book]['fixed_count'][str(i)] = fixedProbabilisticCounter(book_dict[book]['text'], args['elements'], args['stop_words'], args['probability'])
+            logger.info(f'Fixed probability counter number {i} of {book} carried out successfully')
 
-        book_dict[book]['fixed_count'] = fixedProbabilisticCounter(book_dict[book]['text'], args['elements'], args['stop_words'], args['probability'])
-        logger.info(f'Fixed probability counter of {book} carried out successfully')
+            book_dict[book]['csuros_count'][str(i)] = csurosCounter(book_dict[book]['text'], args['elements'], args['stop_words'], args['csuros'])
+            logger.info(f'Csuros counter number {i} of {book} carried out successfully')
 
-        book_dict[book]['csuros_count'] = csurosCounter(book_dict[book]['text'], args['elements'], args['stop_words'], args['csuros'])
-        logger.info(f'Csuros counter of {book} carried out successfully')
-    print(book_dict[book]['csuros_count'])
+
+    # Create average graphs
+    for book in book_dict.keys():
+        book_dict[book]['fixed_count']['average'] = createAverageCounter(book_dict[book]['fixed_count'])
+        book_dict[book]['csuros_count']['average'] = createAverageCounter(book_dict[book]['csuros_count'])
+
+    # Generate bar graphs
+    for book in book_dict.keys():
+        createBarPlot(book_dict[book]['total_count'], args['top_words'], f'{book}-total')
+        createBarPlot(book_dict[book]['fixed_count']['average'], args['top_words'], f'{book}-fixed-{args["repetitions"]}')
+        createBarPlot(book_dict[book]['csuros_count']['average'], args['top_words'], f'{book}-csuros-{args["repetitions"]}')
+
 
 if __name__ == '__main__':
     main()
