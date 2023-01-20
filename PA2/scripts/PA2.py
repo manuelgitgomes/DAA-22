@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from collections import Counter
 from random import random
 import matplotlib.pyplot as plt
+import statistics
 
 # create logger
 logger = logging.getLogger("PA2")
@@ -155,6 +156,20 @@ def csurosCounter(text, elements_to_remove, stop_words_path, csuros_dict):
     return counts
 
 
+def createStats(counter_dict, real_counter, top_word_number, file_name):
+    # Find top words
+    real_top_words = [(word, occurrence) for idx, (word, occurrence) in enumerate(real_counter.most_common()) if idx < top_word_number]
+    real_word_list = [tup[0] for tup in real_top_words]
+
+    top_words = dict()
+
+    
+    for key, counter in counter_dict.items():
+        top_words[key] = [(word, occurrence) for (word, occurrence) in counter.most_common() if word in real_word_list]
+
+    # result = [tuple_value[1] for key, value in top_words.items() for tuple_value in value]
+
+
 def createBarPlot(counter, top_word_number, file_name):
     """Creates bar plot from counter
 
@@ -237,11 +252,13 @@ def main():
         book_dict[book]['fixed_count']['average'] = createAverageCounter(book_dict[book]['fixed_count'])
         book_dict[book]['csuros_count']['average'] = createAverageCounter(book_dict[book]['csuros_count'])
 
+    createStats(book_dict[book]['fixed_count'], book_dict[book]['total_count'], args['top_words'], 'test')
+
     # Generate bar graphs
-    for book in book_dict.keys():
-        createBarPlot(book_dict[book]['total_count'], args['top_words'], f'{book}-total')
-        createBarPlot(book_dict[book]['fixed_count']['average'], args['top_words'], f'{book}-fixed-{args["repetitions"]}')
-        createBarPlot(book_dict[book]['csuros_count']['average'], args['top_words'], f'{book}-csuros-{args["repetitions"]}')
+    # for book in book_dict.keys():
+    #     createBarPlot(book_dict[book]['total_count'], args['top_words'], f'{book}-total')
+    #     createBarPlot(book_dict[book]['fixed_count']['average'], args['top_words'], f'{book}-fixed-{args["repetitions"]}')
+    #     createBarPlot(book_dict[book]['csuros_count']['average'], args['top_words'], f'{book}-csuros-{args["repetitions"]}')
 
 
 if __name__ == '__main__':
