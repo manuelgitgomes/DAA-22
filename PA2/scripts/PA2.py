@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
 import logging
 from math import trunc
+import math
+import sys
 import ebooklib
 from ebooklib import epub 
 from bs4 import BeautifulSoup
@@ -156,19 +159,70 @@ def csurosCounter(text, elements_to_remove, stop_words_path, csuros_dict):
     return counts
 
 
-def createStats(counter_dict, real_counter, top_word_number, file_name):
-    # Find top words
+def createStats(counter_dict, real_counter, top_word_number, book_name):
+    """Create various stats for the counters
+
+    Args:
+        counter_dict (dict): Dictionary of probabilistic counter
+        real_counter (counter): Counter of all words
+        top_word_number (int): Number of top words to calculate stats
+        book_name (str): Name of book counters were taken
+
+    Returns:
+        dict: counter_dict updated with stats
+    """
+    # Create variables
+    top_words = dict()
+    stats = {key: {'occurrence' : []} for idx, (key, occurrence) in enumerate(real_counter.most_common()) if idx < top_word_number}
+
+    # Find real top words
     real_top_words = [(word, occurrence) for idx, (word, occurrence) in enumerate(real_counter.most_common()) if idx < top_word_number]
     real_word_list = [tup[0] for tup in real_top_words]
 
-    top_words = dict()
+    # Find occurrences of top_words in counter
+    for repetition, counter in counter_dict['counter'].items():
+        top_words[repetition] = [(word, occurrence) for (word, occurrence) in counter.most_common() if word in real_word_list]
 
-    
-    for key, counter in counter_dict.items():
-        top_words[key] = [(word, occurrence) for (word, occurrence) in counter.most_common() if word in real_word_list]
+    # Append the occurrences to a list
+    for repetition, word_list in top_words.items():
+        for (key, occurrence) in word_list:
+            stats[key]['occurrence'].append(occurrence)
 
-    # result = [tuple_value[1] for key, value in top_words.items() for tuple_value in value]
+    # For every word, calculate stats
+    for key in stats.keys():
+        stats[key]['real'] = real_counter[key] 
+        if counter_dict['type'] == 'fixed':
+            stats[key]['expected'] = stats[key]['real'] * counter_dict['parameters']['p']
+        elif counter_dict['type'] == 'csuros':
+            x = stats[key]['real']
+            stats[key]['expected']= 0 
+            exp = -1
+            while x > 0:
+                if stats[key]['expected'] % 8 == 0:
+                    exp += 1
+                stats[key]['expected'] += 1 /(2 ** exp)
+                x -= 1 
 
+        stats[key]['mean'] = statistics.mean(stats[key]['occurrence'])
+        stats[key]['stdev'] = statistics.stdev(stats[key]['occurrence'])
+        stats[key]['variance'] = statistics.variance(stats[key]['occurrence'])
+        stats[key]['max_deviation'] = statistics.mean(abs(x - stats[key]['expected']) for x in stats[key]['occurrence']) 
+        stats[key]['mean_abs_error'] = max(abs(x - stats[key]['expected']) for x in stats[key]['occurrence'])
+        stats[key]['mean_rel_error'] = max(abs(x - stats[key]['expected'])/stats[key]['expected'] for x in stats[key]['occurrence'])
+        stats[key]['mean_acc_error'] = max(1 - abs(x - stats[key]['expected'])/stats[key]['expected'] for x in stats[key]['occurrence'])
+        stats[key]['smallest'] = min(stats[key]['occurrence'])
+        stats[key]['largest'] = max(stats[key]['occurrence'])
+
+    stats['real_size'] = sys.getsizeof(real_counter)
+    stats['counter_size'] = sys.getsizeof(counter_dict['counter'])
+
+    # Saving results to a json file
+    with open(f'{book_name}_{counter_dict["type"]}_stats.json', "w") as f:
+        json.dump(stats, f, indent=4)
+
+    counter_dict['stats'] = stats
+
+    return counter_dict
 
 def createBarPlot(counter, top_word_number, file_name):
     """Creates bar plot from counter
@@ -202,8 +256,8 @@ def createAverageCounter(counter_dict):
         counter: Counter with average values
     """
     final_counter = Counter()
-    for i in counter_dict.keys():
-        final_counter += counter_dict[i]
+    for i in counter_dict['counter'].keys():
+        final_counter += counter_dict['counter'][i]
 
     final_counter = Counter({key: value / len(counter_dict.keys()) for key, value in final_counter.items()})
     return final_counter
@@ -237,28 +291,31 @@ def main():
         book_dict[book]['total_count'] = totalCounter(book_dict[book]['text'], args['elements'], args['stop_words'])
         logger.info(f'Full counter of {book} carried out successfully')
         
-        book_dict[book]['fixed_count'] = dict()
-        book_dict[book]['csuros_count'] = dict()
+        book_dict[book]['fixed_count'] = {'parameters': {'p': args['probability']}, 'type': 'fixed', 'counter' : dict()}
+        book_dict[book]['csuros_count'] = {'parameters': args['csuros'], 'type': 'csuros', 'counter' : dict()}
         for i in range(args['repetitions']):
-            book_dict[book]['fixed_count'][str(i)] = fixedProbabilisticCounter(book_dict[book]['text'], args['elements'], args['stop_words'], args['probability'])
+            book_dict[book]['fixed_count']['counter'][str(i)] = fixedProbabilisticCounter(book_dict[book]['text'], args['elements'], args['stop_words'], args['probability'])
             logger.info(f'Fixed probability counter number {i} of {book} carried out successfully')
 
-            book_dict[book]['csuros_count'][str(i)] = csurosCounter(book_dict[book]['text'], args['elements'], args['stop_words'], args['csuros'])
+            book_dict[book]['csuros_count']['counter'][str(i)] = csurosCounter(book_dict[book]['text'], args['elements'], args['stop_words'], args['csuros'])
             logger.info(f'Csuros counter number {i} of {book} carried out successfully')
 
+
+
+    # Generate stats
+    for book in book_dict.keys():
+        book_dict[book]['fixed_count'] = createStats(book_dict[book]['fixed_count'], book_dict[book]['total_count'], args['top_words'], book)
+        book_dict[book]['csuros_count'] = createStats(book_dict[book]['csuros_count'], book_dict[book]['total_count'], args['top_words'], book)
 
     # Create average graphs
     for book in book_dict.keys():
         book_dict[book]['fixed_count']['average'] = createAverageCounter(book_dict[book]['fixed_count'])
         book_dict[book]['csuros_count']['average'] = createAverageCounter(book_dict[book]['csuros_count'])
-
-    createStats(book_dict[book]['fixed_count'], book_dict[book]['total_count'], args['top_words'], 'test')
-
     # Generate bar graphs
-    # for book in book_dict.keys():
-    #     createBarPlot(book_dict[book]['total_count'], args['top_words'], f'{book}-total')
-    #     createBarPlot(book_dict[book]['fixed_count']['average'], args['top_words'], f'{book}-fixed-{args["repetitions"]}')
-    #     createBarPlot(book_dict[book]['csuros_count']['average'], args['top_words'], f'{book}-csuros-{args["repetitions"]}')
+    for book in book_dict.keys():
+        createBarPlot(book_dict[book]['total_count'], args['top_words'], f'{book}-total')
+        createBarPlot(book_dict[book]['fixed_count']['average'], args['top_words'], f'{book}-fixed-{args["repetitions"]}')
+        createBarPlot(book_dict[book]['csuros_count']['average'], args['top_words'], f'{book}-csuros-{args["repetitions"]}')
 
 
 if __name__ == '__main__':
