@@ -1,154 +1,127 @@
 \section{Algorithms Used}\label{section:algorithms-used}
-To retrieve the minimum weight dominating set of a graph $G$, two different types of algorithm were used.
-The first algorithm was an exhaustive search algorithm, while the rest followed a greedy heuristics.
+To count the number of occurrences of every word in a book, an exact counter and two different probabilistic counters were used.
+The two different probabilist counters were a fixed probability counter and a Csűrös' counter.
 
-\subsection{Exhaustive Search}\label{section:exhaustive-search}
+\subsection{Exact Counter Algorithm}
+An exact counter is a data structure that maintains an accurate count of unique items in a stream of data.
+In this specific case, the counter maintains an accurate count of words inside a book. 
 
-Exhaustive search is a brute-force approach to combinatorial problems that consists of generating every element of the problem domain, verify if it fulfils a specific condition and then finding a desired element \cite{levitin2012introduction}.
-
-The exhaustive search used for the problem at hand is based on generating every possible combination of edges of the graph.
-Then, for every single combination, verify if it is a dominating set.
-If so, compute the sum of weights of every edge that belongs to the combination.
-Then, compare that sum with the current minimum weight.
-If the sum is smaller than the minimum, the combination is a better solution than the current minimum set.
-Therefore, the combination at hand is the now the current best solution and the sum of the weights is the current minimum weight.
-This algorithm is better illustrated in \autoref{alg:exhaustive}.
+In this algorithm, an empty data structure is created.
+This data structure creates a subdivision for every new word accounted for.
+Inside that subdivision, an integer keeps count of every account of that specific word.
+This can be better visualised in \autoref{alg:exact}.
 
 \begin{algorithm}
-\caption{Exhaustive search algorithm}
-\label{alg:exhaustive}
+\caption{Exact counter algorithm}
+\label{alg:exact}
 \begin{algorithmic}
-\Inputs{$G(V,E) \gets$ graph with set of vertices $V$ and set of edges $E$}
-\Initialize{$l_c \gets$ list of every combination of edges in $E$
+\Inputs{$book \gets$ string of text to be analysed}
+\Initialize{$counter \gets$ data structure used for counting the occurrences of every word}
 
-$w_{min} \gets \infty$
+\For{$word$ in $book$}
 
-$set_{min} \gets [\cdot]$}
-
-\For{$c$ in $l_c$}
-    \If{$c$ is dominating set of $G(V,E)$}
-
-        $w_c = \sum$ weight of edges in $c$
-        
-        \If{$w_c < w_{min}$}
-
-           \State $w_{min} \gets w_c$
-           \State $set_{min} \gets c$
-
-        \EndIf        
-    \EndIf
-
-\EndFor
-
-\end{algorithmic}
-\end{algorithm}
-
-\subsection{Greedy Heuristics}
-A greedy approach is a general design technique applicable to optimization problems.
-It consists a solution through a set of steps, expanding a partially constructed solution along them.
-On each step, a choice needs to take place.
-That choice needs to be: feasible, so it satisfies the problem's constraints; locally optimal, i.e., it has to be the best possible choice among all feasible choices available; and irreversible, i.e., the choice, once made, cannot be changed \cite{levitin2012introduction}.
-
-For the current problem, three different greedy heuristics were developed: minimum weight, maximum connection and one based on the work of Chaurasia and Singh\cite{chaurasia}.
-
-In the first one, edges of the graph are sorted in ascending order by weight. 
-Then, the edge with the least weight is added to the solution set.
-The solution set is checked to verify if it is a dominating set.
-If so, the solution is found and the algorithm stops.
-If not, add the next edge to the solution edge.
-The algorithm is described in \autoref{alg:min-weight}. 
-
-\begin{algorithm}
-\caption{Minimum weight greedy heuristics}
-\label{alg:min-weight}
-\begin{algorithmic}
-\Inputs{$G(V,E) \gets$ graph with set of vertices $V$ and set of edges $E$}
-\Initialize{$l_{E,W} \gets$ list of $E$ with corresponding set of weights $W$
-
-$w_{min} \gets 0$
-
-$set_{min} \gets [\cdot]$}
-
-
-\State $l_{E,W-sorted} = l_{E,W}$ sorted in ascending order by weight
-\For{$edge,\ weight$ in $l_{E,W-sorted}$}
-
-    \State $set_{min} \gets$ add $edge$
-    \State $w_{min} += weight$
-    \If{$set_{min}$ is dominating set of $G(V,E)$}
-
-        \State \textbf{break}
+    \If{$word$ in $counter$}
+        \State $counter[word]+=1$
+    \Else
+        \State $counter[word] \gets$ data structure
     \EndIf
 \EndFor
 \end{algorithmic}
 \end{algorithm}
 
-The second one is similar to the first, with the difference lying in the sorting step.
-Instead of sorting in ascending order by weight, this heuristics sorts the edges in descending order by number of adjacent edges, as seen in \autoref{alg:max-connection}.
 
-\begin{algorithm}
-\caption{Maximum connection greedy heuristics}
-\label{alg:max-connection}
+% This algorithm was developed by resourcing to the \verb|Counter| data structure from the library \verb|collections| in Python
+This algorithm allows for an exact count of unique items, with no error margin. 
+The downside of using an exact counter is that it can use a lot of memory.
+
+\subsection{Fixed probabilistic counter}
+A fixed probabilistic counter is a data structure that keeps count of the number of distinct elements in a stream of data, with a certain level of precision. 
+It employs random sampling to determine the count and the degree of accuracy can be altered by altering the probability of sampling.
+This probabilty remains constant for the entire duration of the algorithm.
+
+Similarly to \autoref{alg:exact}, an empty data structure is created.
+Every time a new word is analysed, a random number from 0 to 1 is generated.
+If this number is lower than the sampling probability, then the word is sampled.
+If a subdivision for the sampled word does not exist inside the data structure, this division is created.
+Inside that subdivision, an integer keeps count of every account of that specific sampled word.
+This algorithm is explained in \autoref{alg:fixed}.
+
+\clearpage
+
+\begin{algorithm}[ht!]
+\caption{Fixed probability counter algorithm}
+\label{alg:fixed}
 \begin{algorithmic}
-\Inputs{$G(V,E) \gets$ graph with set of vertices $V$ and set of edges $E$}
-\Initialize{$l_{E,W,NA} \gets$ list of $E$ with corresponding sets of weights $W$ and of the number of adjacent edges $NA$
+\Inputs{$book \gets$ string of text to be analysed
 
-$w_{min} \gets 0$
+$p \gets$ sampling probability }
+\Initialize{$counter \gets$ data structure used for counting the occurrences of every word
+            $RandomNumber \gets$ function that generates a number between 0 and 1}
 
-$set_{min} \gets [\cdot]$}
 
 
-\State $l_{E,W,NA-sorted} = l_{E,W,NA}$ sorted in descending order by number of adjacent edges
-\For{$edge,\ weight,\ n_{adjacent}$ in $l_{E,W,NA-sorted}$}
+\For{$word$ in $book$}
+    $r_{number} = RandomNumber$
+    \If{$r_{number}<p$}
 
-    \State $set_{min} \gets$ add $edge$
-    \State $w_{min} += weight$
-    \If{$set_{min}$ is dominating set of $G(V,E)$}
+        \If{$word$ in $counter$}
+            \State $counter[word]+=1$
+        \Else
+            \State $counter[word] \gets$ data structure
+        \EndIf
 
-        \State \textbf{break}
     \EndIf
 \EndFor
 \end{algorithmic}
 \end{algorithm}
 
-% \newpage
-The third greedy algorithm is based on the work by Chaurasia-Singh\cite{chaurasia}.
-In this algorithm, a weight ratio for a certain edge is calculated by dividing the sum of the weights of its adjacent edges by the weight of the edge itself.
-The edges are then sorted in descending order by their weight ratio.
-The algorithm is exemplified in \autoref{alg:chaurasia}.
 
+\subsection{Csűrös' probabilty counter algorithm}
+Another type of probabilistic counter are the counters with decreasing probabilty.
+A decreasing probabilistic counter is, similarly to a fixed probabilistic counter, a data structure that keeps count of the number of distinct elements in a stream of data, with a certain level of precision. 
+It also employs random sampling to determine the count.
+However, the sampling probabilty decreases as the algorithm evolves.
+This allows for an accurate count in the first occurrences of an event without using to much memory.
 
-\begin{algorithm}
-\caption{Chaurasia-Singh greedy heuristics}
-\label{alg:chaurasia}
+One example of this type of counter is the Csűrös' counter. %TODO add citation
+This is a floating-point counter defined with the aid of a design parameter $M = 2^d$, where d is a nonnegative integer.
+This counter counts with deterministic updates for the first $M$ occurrence, similarly to \autoref{alg:exact}.
+The next updates are probabilistic, with the next $M$ updates having a probability of $\frac{1}{2}$, followed by $M$ updates with probabilty of $\frac{1}{4}$, etc...
+This algorithm is described in \autoref{alg:csuros} and \autoref{fig:csuros}.
+
+\begin{algorithm}[ht!]
+\caption{Csűrös' counter algorithm}
+\label{alg:csuros}
 \begin{algorithmic}
-\Inputs{$G(V,E) \gets$ graph with set of vertices $V$ and set of edges $E$}
-\Initialize{$l_{E,W,W_{A}} \gets$ list of $E$ with corresponding sets of weights $W$, and of weight of adjacent edges $W_A$}
+\Inputs{$book \gets$ string of text to be analysed
 
-$w_{min} \gets 0$
+$d \gets$ design parameter}
+\Initialize{$counter \gets$ data structure used for counting the occurrences of every word
+            $RandomNumber \gets$ function that generates a number between 0 and 1}
 
-$set_{min} \gets [\cdot]$
 
-$l_{W_{r} \gets [\cdot]}$
 
-\For{$edge,\ weight,\ weight_{adjacents}$ in $l_{E,W,W_{A}}$}
-    
-    $W_{ratio} = weight_{adjacents} / weight$
-    \State $l_{W_{r}} \gets$ add $W_{ratio}$
+\For{$word$ in $book$}
+    $r_{number} = RandomNumber$
+    \If{$r_{number}<(\frac{1}{2})^{truncate(counter[word]/2^d)}$}
 
-\EndFor
+        \If{$word$ in $counter$}
+            \State $counter[word]+=1$
+        \Else
+            \State $counter[word] \gets$ data structure
+        \EndIf
 
-\State $l_{E,W,W_{A},W_{r}} \gets [l_{E,W,W_{A}},\ l_{W_{r}}]$
-
-\State $l_{E,W,W_{A},W_{r}-sorted} = l_{E,W, W_{A}, W_{r}}$ sorted in descending order by weight ratio $w_r$
-\For{$edge,\ weight,\ weight_{adjacent}, weight_{ratio}$ in $l_{E,W,W_{A},W_{r}-sortedE-W-Asorted}$}
-
-    \State $set_{min} \gets$ add $edge$
-    \State $w_{min} += weight$
-    \If{$set_{min}$ is dominating set of $G(V,E)$}
-
-        \State \textbf{break}
     \EndIf
 \EndFor
 \end{algorithmic}
 \end{algorithm}
+
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figs/csuros.png}
+    \caption{Csűrös' counter exemplified in graphical form.}
+    \label{fig:csuros}
+\end{figure}
+
+

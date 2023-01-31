@@ -10,7 +10,7 @@ import ebooklib
 from ebooklib import epub 
 from bs4 import BeautifulSoup
 from collections import Counter
-from random import random
+from random import random, seed
 import matplotlib.pyplot as plt
 import statistics
 
@@ -213,8 +213,8 @@ def createStats(counter_dict, real_counter, top_word_number, book_name):
         stats[key]['smallest'] = min(stats[key]['occurrence'])
         stats[key]['largest'] = max(stats[key]['occurrence'])
 
+    stats['avg_counter_size'] = sys.getsizeof(counter_dict['counter'])/len(counter_dict['counter'].keys())
     stats['real_size'] = sys.getsizeof(real_counter)
-    stats['counter_size'] = sys.getsizeof(counter_dict['counter'])
 
     # Saving results to a json file
     with open(f'{book_name}_{counter_dict["type"]}_stats.json', "w") as f:
@@ -255,11 +255,10 @@ def createAverageCounter(counter_dict):
     Returns:
         counter: Counter with average values
     """
-    final_counter = Counter()
+    tmp_counter = Counter()
     for i in counter_dict['counter'].keys():
-        final_counter += counter_dict['counter'][i]
-
-    final_counter = Counter({key: value / len(counter_dict.keys()) for key, value in final_counter.items()})
+        tmp_counter += counter_dict['counter'][i]
+    final_counter = Counter({key: value / len(counter_dict['counter'].keys()) for key, value in tmp_counter.items()})
     return final_counter
     
 
@@ -280,6 +279,9 @@ def main():
     args = vars(ap.parse_args())
     logger.info(f'The inputs of the script are: {args}')
 
+    # Defining seed
+    seed(88939)
+
     # Getting text from epub
     book_dict = dict([(key, dict()) for key in args['books']])
     for book in args['books']:
@@ -295,11 +297,11 @@ def main():
         book_dict[book]['csuros_count'] = {'parameters': args['csuros'], 'type': 'csuros', 'counter' : dict()}
         for i in range(args['repetitions']):
             book_dict[book]['fixed_count']['counter'][str(i)] = fixedProbabilisticCounter(book_dict[book]['text'], args['elements'], args['stop_words'], args['probability'])
-            logger.info(f'Fixed probability counter number {i} of {book} carried out successfully')
+            # logger.info(f'Fixed probability counter number {i} of {book} carried out successfully')
 
             book_dict[book]['csuros_count']['counter'][str(i)] = csurosCounter(book_dict[book]['text'], args['elements'], args['stop_words'], args['csuros'])
-            logger.info(f'Csuros counter number {i} of {book} carried out successfully')
-
+            # logger.info(f'Csuros counter number {i} of {book} carried out successfully')
+        logger.info(f'Approximate counters of {book} done!')
 
 
     # Generate stats
@@ -311,6 +313,8 @@ def main():
     for book in book_dict.keys():
         book_dict[book]['fixed_count']['average'] = createAverageCounter(book_dict[book]['fixed_count'])
         book_dict[book]['csuros_count']['average'] = createAverageCounter(book_dict[book]['csuros_count'])
+
+    print(book_dict[book]['fixed_count']['average'].most_common(10))
     # Generate bar graphs
     for book in book_dict.keys():
         createBarPlot(book_dict[book]['total_count'], args['top_words'], f'{book}-total')
