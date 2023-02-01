@@ -1,1 +1,23 @@
 \section{Conclusions}\label{section:conclusions}
+In this report, three different algorithm were presented to count the number of words inside a book.
+The first one is an exact algorithm, counting every occurrence of every word, prioritizing accuracy to efficient memory usage.
+The second is a fixed probability counter, which reduces accuracy in order to occupy less memory.
+This can however lead to large inaccuracies.
+To tackle this, the third counter, a Csűrös' counter was implemented.
+In this counter, the probability of counting a word decreases with the number of equal words counted. 
+
+Results show that, on average, both probabilistic counters are accurate.
+However, the fixed probability counter presents itself with a larger standard deviation.
+This is due to the chaotic nature of the sampling, following only a fixed probability.
+The Csűrös' counter has a lower standard deviation, which is to be expected, due to the probability of counting a word decreases with number of counts, leading to more severe probabilities for the top words.
+This severe probability creates an environment where augmenting your counter does not happen very often, leading to counter values being less spread out.
+This effect can also be visualized in the mean relative error, which is considerably smaller in the Csűrös' counter. 
+Some can argue that the mean accuracy ratio is worse than the one presented by the fixed probability counter, which is true, but only shows that the average value of the fixed counter stays closer to the expected one, which does hold significant value when the variance is high.
+It also needs to be taken into account that due to reasons previously explained the Csűrös' counter is \emph{low-biased}, achieving results that, on average, are smaller than the ones expected.
+This can be visualized on the mean accuracy error, never surpassing 1.
+Nevertheless, both of the probabilistic counters occupy much less memory than the exact one.
+
+Results also show a difference between different editions of the same book, especially the ones retrieved from Project Gutenberg, where the words \emph{project} and \emph{gutenberg} appear in the top-10.
+
+Possible work on this subject would be the implementation of more types of counters, such as the Morris' counter, and comparing them with the results obtain in here.
+Another possible line of work would be to invest in larger computational experiments to better validate these results.

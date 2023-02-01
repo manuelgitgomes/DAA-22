@@ -46,7 +46,7 @@ If a subdivision for the sampled word does not exist inside the data structure, 
 Inside that subdivision, an integer keeps count of every account of that specific sampled word.
 This algorithm is explained in \autoref{alg:fixed}.
 
-\clearpage
+% \clearpage
 
 \begin{algorithm}[ht!]
 \caption{Fixed probability counter algorithm}
@@ -68,12 +68,20 @@ $p \gets$ sampling probability }
             \State $counter[word]+=1$
         \Else
             \State $counter[word] \gets$ data structure
+            \State $counter[word]=1$
         \EndIf
 
     \EndIf
 \EndFor
 \end{algorithmic}
 \end{algorithm}
+
+For a specific number of occurrences $x$ with $p$ being the sampling probability, to calculate the expected count $f(x)$, it is used:
+
+\begin{equation}
+    f(x) = \frac{x}{p}
+    \label{eq:fixed}
+\end{equation}
 
 
 \subsection{Csűrös' probabilty counter algorithm}
@@ -87,7 +95,14 @@ One example of this type of counter is the Csűrös' counter. %TODO add citation
 This is a floating-point counter defined with the aid of a design parameter $M = 2^d$, where d is a nonnegative integer.
 This counter counts with deterministic updates for the first $M$ occurrence, similarly to \autoref{alg:exact}.
 The next updates are probabilistic, with the next $M$ updates having a probability of $\frac{1}{2}$, followed by $M$ updates with probabilty of $\frac{1}{4}$, etc...
-This algorithm is described in \autoref{alg:csuros} and \autoref{fig:csuros}.
+This algorithm is described in \autoref{fig:csuros} and \autoref{alg:csuros}.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figs/csuros.png}
+    \caption{Csűrös' counter exemplified in graphical form.}
+    \label{fig:csuros}
+\end{figure}
 
 \begin{algorithm}[ht!]
 \caption{Csűrös' counter algorithm}
@@ -97,31 +112,82 @@ This algorithm is described in \autoref{alg:csuros} and \autoref{fig:csuros}.
 
 $d \gets$ design parameter}
 \Initialize{$counter \gets$ data structure used for counting the occurrences of every word
-            $RandomNumber \gets$ function that generates a number between 0 and 1}
+            $RandomNumber \gets$ function that generates a number between 0 and 1
+            \State $t \gets$ 0
+            \State $u \gets$ 0}
 
 
 
 \For{$word$ in $book$}
-    $r_{number} = RandomNumber$
-    \If{$r_{number}<(\frac{1}{2})^{truncate(counter[word]/2^d)}$}
+    \State $r_{number} = RandomNumber$
+    \If{$r_{number}<(\frac{1}{2})^{t}$}
 
         \If{$word$ in $counter$}
             \State $counter[word]+=1$
+            \State $u +=1$
         \Else
             \State $counter[word] \gets$ data structure
-        \EndIf
+            \State $counter[word]=1$
+            \State $u +=1$
+        \EndIf for a specific number of occurrences $x$, with $p$ being the sampling probability:
 
+    \EndIf
+    \If{$u==2^d$}
+        \State $t +=1$
+        \State $u = 0$
     \EndIf
 \EndFor
 \end{algorithmic}
 \end{algorithm}
 
 
-\begin{figure}[!ht]
-    \centering
-    \includegraphics[width=0.9\linewidth]{figs/csuros.png}
-    \caption{Csűrös' counter exemplified in graphical form.}
-    \label{fig:csuros}
-\end{figure}
+
+For a specific number of occurrences $x$ with $p$ being the design parameter and $M = 2^p$, to calculate the expected count $f(x)$, it is used:
+
+\begin{equation}
+    x = (M +u)2^t-M
+    \label{eq:csuros1}
+\end{equation}
+\begin{equation}
+    f(x) = Mt + u
+    \label{eq:csuros2}
+\end{equation}
+
+\noindent with $u$ and $t$ representing the variables in \autoref{alg:csuros}.
+
+However, these equations are not enough because we have three unknown variables $f(x)$, $t$, and $u$, and only two different equations.
+Nevertheless, it is known that $u$ is not larger than 8 and $t$ is the number of times $u$ hits the number 8.
+Therefore, the following algorithm was developed:
+
+\begin{algorithm}[ht!]
+\caption{Csűrös' estimation algorithm}
+\label{alg:csuros1}
+\begin{algorithmic}
+\Inputs{$x \gets$ specific number of occurrences
+
+$d \gets$ design parameter}
+\Initialize{$t \gets$ 0
+            \State $u \gets$ 0
+            \State $f(x) \gets$ 0}
+
+
+ \While{$x>0$}
+    
+    \State $f(x) += (\frac{1}{2})^t$
+    \State $u+=1$
+    \State $x-=1$    
+
+    \If{$u==2^d$}
+        \State $t +=1$
+        \State $u = 0$
+    \EndIf
+
+ \EndWhile
+
+
+\end{algorithmic}
+\end{algorithm}
+
+
 
 
